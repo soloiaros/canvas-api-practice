@@ -5,19 +5,19 @@ import { offsetHSL } from 'canvas-sketch-util/color'
 import risoColors from 'riso-colors';
 
 const settings = {
-  dimensions: [ 1080, 1080 ],
+  // dimensions: [ 1080, 1080 ],
   animate: true,
-  fps: 16,
+  fps: 30,
 };
 
 const colorPalette = [];
-for (let i = 0; i < 3; i++) {colorPalette.push(random.pick(risoColors))};
+for (let i = 0; i < 2; i++) {colorPalette.push(random.pick(risoColors))};
 const bodyColor = random.pick(risoColors).hex;
 
 const sketch = ({ width, height }) => {
   
   let rectNum;
-  rectNum = 20;
+  rectNum = 40;
   let rects = [];
   for (let i = 0; i < rectNum; i++) {
     rects.push(createRectObject(-200, -40, width + 200, height + 40 ));
@@ -32,7 +32,7 @@ const sketch = ({ width, height }) => {
     context.fillStyle = bodyColor;
     context.fillRect(0, 0, width, height);
 
-    if (frame % 2 == 0) {
+    if (frame % 3 == 0) {
       let updatedRects = [];
       for (let rect of rects) {
         rect.x -= moveOffsetX;
@@ -55,6 +55,8 @@ const sketch = ({ width, height }) => {
       context.strokeStyle = rect.stroke;
       context.fillStyle = rect.fill;
       context.lineWidth = random.range(7, 10);
+      context.globalCompositeOperation = rect.blend;
+      
       drawSkewedRect({ context, w: rect.w, h: rect.h, rx: rect.rx, ry: rect.ry, degrees: rect.degrees });
 
       const darkerFill = offsetHSL(rect.fill, 0, 0, -20);
@@ -66,7 +68,11 @@ const sketch = ({ width, height }) => {
       
       context.shadowColor = null;
       context.stroke();
+      context.lineWidth = 2;
+      context.strokeStyle = 'black';
+      context.stroke();
 
+      context.globalCompositeOperation = 'source-over';
       context.restore();
     }
     
@@ -74,8 +80,8 @@ const sketch = ({ width, height }) => {
 };
 
 function createRectObject(xStart, yStart, xFinish, yFinish) {
-  let x, y, w, h, rx, ry, degrees, angle, fill, stroke;
-  w = random.range(200, 600);
+  let x, y, w, h, rx, ry, degrees, angle, fill, stroke, blend;
+  w = random.range(600, 800);
   h = random.range(40, 200);
   x = random.range(xStart, xFinish);
   y = random.range(yStart, yFinish);
@@ -85,7 +91,8 @@ function createRectObject(xStart, yStart, xFinish, yFinish) {
   ry = Math.sin(angle) * w;
   stroke = random.pick(colorPalette).hex;
   fill = Math.random() > 0.3 ? random.pick(colorPalette).hex : 'transparent';
-  return { x, y, rx, ry, w, h, degrees, stroke, fill };
+  blend = Math.random() > 0.5 ? 'overlay' : 'source-over';
+  return { x, y, rx, ry, w, h, degrees, stroke, fill, blend };
 }
 
 function drawSkewedRect({ context, w, h, rx, ry }) {

@@ -9,7 +9,7 @@
   "scripts": {
     "create": "canvas-sketch-cli --new --open",
     "open": "canvas-sketch-cli --open",
-    "record": "canvas-sketch-cli sketch-skew/trig-skew.js --output=tmp --stream=gif",
+    "record": "canvas-sketch-cli --open --output=tmp --stream=gif",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
