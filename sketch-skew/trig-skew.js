@@ -1,37 +1,40 @@
 import canvasSketch from 'canvas-sketch';
 import { degToRad } from 'canvas-sketch-util/math';
+import random from 'canvas-sketch-util/random'
 
 const settings = {
   dimensions: [ 1080, 1080 ],
-  animate: true,
-  duration: 5,
-  fps: 16,
 };
 
-const sketch = () => {
+const sketch = ({ width, height }) => {
 
-  let x, y, w, h, degrees;
-  degrees = 0;
+  let x, y, w, h, degrees, rectNum, rects;
+  rectNum = 20;
+  rects = [];
+  for (let i = 0; i < rectNum; i++) {
+    w = random.range(200, 600);
+    h = random.range(40, 200);
+    x = random.range(0, width);
+    y = random.range(0, height);
+    degrees = random.pick([-30, 150]);
+    rects.push({ x, y, w, h, degrees })
+  }
 
-  return ({ context, width, height, frame }) => {
+  return ({ context, width, height }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
-    w = width * 0.6;
-    h = height * 0.1;
-    x = width * 0.5;
-    y = height * 0.5;
-    if (frame % 2 === 0) {
-      degrees = (degrees += 3) % 360;
-    }
     
   context.strokeStyle = 'blue';
   context.fillStyle = 'blue';
-  context.save();
-  context.translate(x, y);
-  drawSkewedRect({ context, w, h, degrees });
-  if (90 <= degrees  && degrees <= 270) {context.fill()} else {context.stroke()};
-  context.restore();
+  for (let { x, y, w, h, degrees } of rects) {
+    context.save();
+    context.translate(x, y);
+    drawSkewedRect({ context, w, h, degrees });
+    console.log(x, y)
+    if (90 <= degrees  && degrees <= 270) {context.fill()} else {context.stroke()};
+    context.restore();
+  }
     
   };
 };
