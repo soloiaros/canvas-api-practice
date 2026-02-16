@@ -1,0 +1,9 @@
+{
+    "typeAcquisition": {
+        "include": [
+            "canvas-sketch",
+            "canvas-sketch-cli",
+            "canvas",
+        ]
+    }
+}
