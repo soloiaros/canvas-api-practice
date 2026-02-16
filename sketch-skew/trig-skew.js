@@ -25,8 +25,6 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, frame }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
-    context.strokeStyle = 'blue';
-    context.fillStyle = 'blue';
 
     if (frame % 2 == 0) {
       let updatedRects = [];
@@ -49,7 +47,10 @@ const sketch = ({ width, height }) => {
       context.save();
       context.translate(rect.x, rect.y);
       drawSkewedRect({ context, w: rect.w, h: rect.h, rx: rect.rx, ry: rect.ry, degrees: rect.degrees });
-      if (rect.style === 'fill') {context.fill()} else {context.stroke()};
+      context.strokeStyle = rect.stroke;
+      context.fillStyle = rect.fill;
+      context.fill()
+      context.stroke();
       context.restore();
     }
     
@@ -57,7 +58,7 @@ const sketch = ({ width, height }) => {
 };
 
 function createRectObject(xStart, yStart, xFinish, yFinish) {
-  let x, y, w, h, rx, ry, degrees, angle, style;
+  let x, y, w, h, rx, ry, degrees, angle, fill, stroke;
   w = random.range(200, 600);
   h = random.range(40, 200);
   x = random.range(xStart, xFinish);
@@ -66,8 +67,9 @@ function createRectObject(xStart, yStart, xFinish, yFinish) {
   angle = degToRad(degrees);
   rx = Math.cos(angle) * w;
   ry = Math.sin(angle) * w;
-  style = Math.random() > 0.7 ? 'fill' : 'stroke';
-  return { x, y, rx, ry, w, h, degrees, style };
+  stroke = 'black'
+  fill = Math.random() > 0.7 ? 'red' : 'transparent';
+  return { x, y, rx, ry, w, h, degrees, stroke, fill };
 }
 
 function drawSkewedRect({ context, w, h, rx, ry }) {
