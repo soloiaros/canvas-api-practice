@@ -1,6 +1,8 @@
 import canvasSketch from 'canvas-sketch';
 import { degToRad } from 'canvas-sketch-util/math';
-import random from 'canvas-sketch-util/random'
+import random from 'canvas-sketch-util/random';
+import { offsetHSL } from 'canvas-sketch-util/color'
+import risoColors from 'riso-colors';
 
 const settings = {
   dimensions: [ 1080, 1080 ],
@@ -8,8 +10,12 @@ const settings = {
   fps: 16,
 };
 
-const sketch = ({ width, height }) => {
+const colorPalette = [];
+for (let i = 0; i < 3; i++) {colorPalette.push(random.pick(risoColors))};
+const bodyColor = random.pick(risoColors).hex;
 
+const sketch = ({ width, height }) => {
+  
   let rectNum;
   rectNum = 20;
   let rects = [];
@@ -23,7 +29,7 @@ const sketch = ({ width, height }) => {
   const moveOffsetY = Math.sin(degToRad(moveAngle)) * moveDistance;
 
   return ({ context, width, height, frame }) => {
-    context.fillStyle = 'white';
+    context.fillStyle = bodyColor;
     context.fillRect(0, 0, width, height);
 
     if (frame % 2 == 0) {
@@ -46,11 +52,21 @@ const sketch = ({ width, height }) => {
     for (let rect of rects) {
       context.save();
       context.translate(rect.x, rect.y);
-      drawSkewedRect({ context, w: rect.w, h: rect.h, rx: rect.rx, ry: rect.ry, degrees: rect.degrees });
       context.strokeStyle = rect.stroke;
       context.fillStyle = rect.fill;
+      context.lineWidth = random.range(7, 10);
+      drawSkewedRect({ context, w: rect.w, h: rect.h, rx: rect.rx, ry: rect.ry, degrees: rect.degrees });
+
+      const darkerFill = offsetHSL(rect.fill, 0, 0, -20);
+      
+      context.shadowColor = darkerFill.hex;
+      context.shadowOffsetX = -10;
+      context.shadowOffsetY = -20;
       context.fill()
+      
+      context.shadowColor = null;
       context.stroke();
+
       context.restore();
     }
     
@@ -67,8 +83,8 @@ function createRectObject(xStart, yStart, xFinish, yFinish) {
   angle = degToRad(degrees);
   rx = Math.cos(angle) * w;
   ry = Math.sin(angle) * w;
-  stroke = 'black'
-  fill = Math.random() > 0.7 ? 'red' : 'transparent';
+  stroke = random.pick(colorPalette).hex;
+  fill = Math.random() > 0.3 ? random.pick(colorPalette).hex : 'transparent';
   return { x, y, rx, ry, w, h, degrees, stroke, fill };
 }
 

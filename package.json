@@ -9,6 +9,7 @@
   "scripts": {
     "create": "canvas-sketch-cli --new --open",
     "open": "canvas-sketch-cli --open",
+    "record": "canvas-sketch-cli sketch-skew/trig-skew.js --output=tmp --stream=gif",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "canvas-sketch": "^0.7.7"
+    "canvas-sketch": "^0.7.7",
+    "riso-colors": "^1.0.1"
   }
 }
