@@ -4,10 +4,13 @@ import random from 'canvas-sketch-util/random';
 import { offsetHSL } from 'canvas-sketch-util/color'
 import risoColors from 'riso-colors';
 
+const seed = random.getRandomSeed();
+
 const settings = {
   dimensions: [ 1080, 1080 ],
   animate: true,
   fps: 30,
+  name: seed,
 };
 
 const colorPalette = [];
@@ -15,9 +18,10 @@ for (let i = 0; i < 2; i++) {colorPalette.push(random.pick(risoColors))};
 const bodyColor = random.pick(risoColors).hex;
 
 const sketch = ({ width, height }) => {
+
+  random.setSeed(seed);
   
-  let rectNum;
-  rectNum = 40;
+  let rectNum = 40;
   let rects = [];
   for (let i = 0; i < rectNum; i++) {
     rects.push(createRectObject(0, 0, width, height ));
