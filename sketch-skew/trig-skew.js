@@ -5,7 +5,7 @@ import { offsetHSL } from 'canvas-sketch-util/color'
 import risoColors from 'riso-colors';
 
 const settings = {
-  // dimensions: [ 1080, 1080 ],
+  dimensions: [ 1080, 1080 ],
   animate: true,
   fps: 30,
 };
@@ -20,7 +20,15 @@ const sketch = ({ width, height }) => {
   rectNum = 40;
   let rects = [];
   for (let i = 0; i < rectNum; i++) {
-    rects.push(createRectObject(-200, -40, width + 200, height + 40 ));
+    rects.push(createRectObject(0, 0, width, height ));
+  }
+
+  const mask = {
+    radius: width * 0.4,
+    sides: 3,
+    rotate: false,
+    x: width * 0.5,
+    y: height * 0.5,
   }
 
   const moveDistance = 5;
@@ -31,6 +39,14 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, frame }) => {
     context.fillStyle = bodyColor;
     context.fillRect(0, 0, width, height);
+    
+    context.save()
+
+    context.translate(mask.x, mask.y);
+    drawRegularPolygon({ context, radius: mask.radius, sides: mask.sides, rotate: mask.rotate });
+    context.clip();
+
+    context.translate(-mask.x, -mask.y);
 
     if (frame % 3 == 0) {
       let updatedRects = [];
@@ -42,8 +58,8 @@ const sketch = ({ width, height }) => {
         } else {
           let spawnMode = random.pick(['h', 'v']);
           let widthStart = spawnMode === 'h' ? 0 : width;
-          let heightFinish = spawnMode === 'v' ?  height : -100;
-          updatedRects.push(createRectObject(widthStart, -250, width + 100, heightFinish));
+          let heightFinish = spawnMode === 'v' ?  height : 0;
+          updatedRects.push(createRectObject(widthStart, 0, width, heightFinish));
         }
       }
       rects = updatedRects;
@@ -76,6 +92,19 @@ const sketch = ({ width, height }) => {
       context.restore();
     }
     
+    context.restore();
+    
+    // mask's outline
+    context.save();
+
+    context.translate(mask.x, mask.y);
+    context.lineWidth = 25;
+    context.globalCompositeOperation = 'color-burn';
+    drawRegularPolygon({ context, radius: mask.radius - context.lineWidth, sides: mask.sides, rotate: mask.rotate })
+    context.strokeStyle = colorPalette[0].hex;
+    context.stroke();
+
+    context.restore()
   };
 };
 
@@ -96,15 +125,29 @@ function createRectObject(xStart, yStart, xFinish, yFinish) {
 }
 
 function drawSkewedRect({ context, w, h, rx, ry }) {
-  
-  context.save();
   context.beginPath();
   context.moveTo(0, 0);
   context.lineTo(rx, ry);
   context.lineTo(rx, ry + h);
   context.lineTo(0, h);
   context.closePath();
-  context.restore();
+}
+
+function drawRegularPolygon({ context, radius = 100, sides = 3, rotate = false }) {
+  const slice = Math.PI * 2 / sides;
+
+  context.beginPath();
+  const initialAngle = rotate ? 0.5 * slice : 0;
+  if (rotate) {
+    context.moveTo(radius * Math.cos(initialAngle - Math.PI * 0.5), radius * Math.sin(initialAngle - Math.PI * 0.5))
+  } else {
+    context.moveTo(0, -radius);
+  }
+  for (let i = 1; i < sides; i++) {
+    const theta = slice * i - Math.PI * 0.5;
+    context.lineTo(radius * Math.cos(theta + initialAngle), radius * Math.sin(theta + initialAngle));
+  }
+  context.closePath();
 }
 
 canvasSketch(sketch, settings);
