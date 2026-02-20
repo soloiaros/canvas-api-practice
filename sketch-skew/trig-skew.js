@@ -24,7 +24,7 @@ const sketch = ({ width, height }) => {
   let rectNum = 40;
   let rects = [];
   for (let i = 0; i < rectNum; i++) {
-    rects.push(createRectObject(0, 0, width, height ));
+    rects.push(createRectObject({ xStart: 0, yStart: 0, xFinish: width, yFinish: height }));
   }
 
   const mask = {
@@ -35,10 +35,6 @@ const sketch = ({ width, height }) => {
     y: height * 0.5,
   }
 
-  const moveDistance = 5;
-  const moveAngle = -30;
-  const moveOffsetX = Math.cos(degToRad(moveAngle)) * moveDistance;
-  const moveOffsetY = Math.sin(degToRad(moveAngle)) * moveDistance;
 
   return ({ context, width, height, frame }) => {
     context.fillStyle = bodyColor;
@@ -55,15 +51,28 @@ const sketch = ({ width, height }) => {
     if (frame % 3 == 0) {
       let updatedRects = [];
       for (let rect of rects) {
+        const moveOffsetX = Math.cos(degToRad(rect.moveAngle)) * rect.speed;
+        const moveOffsetY = Math.sin(degToRad(rect.moveAngle)) * rect.speed;
         rect.x -= moveOffsetX;
         rect.y -= moveOffsetY;
-        if (!(rect.x + rect.rx < 0 || rect.y + rect.ry > height)) {
-          updatedRects.push(rect);
+        if (rect.speed > 0) {
+          if (!(rect.x + rect.rx < 0 || rect.y + rect.ry > height)) {
+            updatedRects.push(rect);
+          } else {
+            let spawnMode = random.pick(['h', 'v']);
+            let xStart = spawnMode === 'h' ? 0 : width;
+            let yFinish = spawnMode === 'v' ?  height : 0;
+            updatedRects.push(createRectObject({ xStart, yStart: 0, xFinish: width, yFinish, direction: 1 }));
+          }
         } else {
-          let spawnMode = random.pick(['h', 'v']);
-          let widthStart = spawnMode === 'h' ? 0 : width;
-          let heightFinish = spawnMode === 'v' ?  height : 0;
-          updatedRects.push(createRectObject(widthStart, 0, width, heightFinish));
+          if (!(rect.x > 0 || rect.y < 0)) {
+            updatedRects.push(rect);
+          } else {
+            let spawnMode = random.pick(['h', 'v']);
+            let xFinish = spawnMode === 'h' ? width : 0;
+            let yStart = spawnMode === 'v' ?  0 : height;
+            updatedRects.push(createRectObject({ xStart: 0, yStart, xFinish, yFinish: height, direction: -1 }));
+          }
         }
       }
       rects = updatedRects;
@@ -112,8 +121,8 @@ const sketch = ({ width, height }) => {
   };
 };
 
-function createRectObject(xStart, yStart, xFinish, yFinish) {
-  let x, y, w, h, rx, ry, degrees, angle, fill, stroke, blend;
+function createRectObject({ xStart, yStart, xFinish, yFinish, animationRange = [2, 5], moveAngle = -30, direction = null }) {
+  let x, y, w, h, rx, ry, degrees, angle, fill, stroke, blend, speed;
   w = random.range(600, 800);
   h = random.range(40, 200);
   x = random.range(xStart, xFinish);
@@ -125,7 +134,9 @@ function createRectObject(xStart, yStart, xFinish, yFinish) {
   stroke = random.pick(colorPalette).hex;
   fill = Math.random() > 0.3 ? random.pick(colorPalette).hex : 'transparent';
   blend = Math.random() > 0.5 ? 'overlay' : 'source-over';
-  return { x, y, rx, ry, w, h, degrees, stroke, fill, blend };
+  speed = Math.floor(random.range(animationRange[0], animationRange[1]))
+  console.log(speed, direction)
+  return { x, y, rx, ry, w, h, degrees, stroke, fill, blend, speed, moveAngle };
 }
 
 function drawSkewedRect({ context, w, h, rx, ry }) {
