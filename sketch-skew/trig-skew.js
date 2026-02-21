@@ -29,8 +29,8 @@ const sketch = ({ width, height }) => {
 
   const mask = {
     radius: width * 0.4,
-    sides: 3,
-    rotate: false,
+    sides: 6,
+    rotate: true,
     x: width * 0.5,
     y: height * 0.5,
   }
@@ -65,7 +65,7 @@ const sketch = ({ width, height }) => {
             updatedRects.push(createRectObject({ xStart, yStart: 0, xFinish: width, yFinish, direction: 1 }));
           }
         } else {
-          if (!(rect.x > 0 || rect.y < 0)) {
+          if (!(rect.x > width || rect.y < 0)) {
             updatedRects.push(rect);
           } else {
             let spawnMode = random.pick(['h', 'v']);
@@ -121,12 +121,13 @@ const sketch = ({ width, height }) => {
   };
 };
 
-function createRectObject({ xStart, yStart, xFinish, yFinish, animationRange = [2, 5], moveAngle = -30, direction = null }) {
+function createRectObject({ xStart, yStart, xFinish, yFinish, animationRange = [3, 10], moveAngle = -30, direction = null }) {
   let x, y, w, h, rx, ry, degrees, angle, fill, stroke, blend, speed;
+  direction = direction ? direction : random.pick([1, -1]);
   w = random.range(600, 800);
   h = random.range(40, 200);
-  x = random.range(xStart, xFinish);
-  y = random.range(yStart, yFinish);
+  x = direction === -1 ? random.range(xStart, xFinish) - w: random.range(xStart, xFinish);
+  y = direction === -1 ? random.range(yStart, yFinish) + h: random.range(yStart, yFinish);
   degrees = -30;
   angle = degToRad(degrees);
   rx = Math.cos(angle) * w;
@@ -134,8 +135,8 @@ function createRectObject({ xStart, yStart, xFinish, yFinish, animationRange = [
   stroke = random.pick(colorPalette).hex;
   fill = Math.random() > 0.3 ? random.pick(colorPalette).hex : 'transparent';
   blend = Math.random() > 0.5 ? 'overlay' : 'source-over';
-  speed = Math.floor(random.range(animationRange[0], animationRange[1]))
-  console.log(speed, direction)
+  speed = Math.floor(random.range(animationRange[0], animationRange[1]));
+  speed = speed * direction;
   return { x, y, rx, ry, w, h, degrees, stroke, fill, blend, speed, moveAngle };
 }
 
