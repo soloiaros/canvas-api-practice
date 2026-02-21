@@ -8,7 +8,7 @@ const sketch = () => {
 
   const points = [
     new Point({ x: 200, y: 540 }),
-    new Point({ x: 350, y: 300, control: true }),
+    new Point({ x: 800, y: 800, control: true }),
     new Point({ x: 880, y: 540 }),
   ]
 
@@ -18,9 +18,13 @@ const sketch = () => {
 
     context.strokeStyle = 'black';
     context.beginPath();
-    context.moveTo(200, 540);
-    context.quadraticCurveTo(350, 300, 880, 540);
+    context.moveTo(points[0].x, points[0].y);
+    context.quadraticCurveTo(points[1].x, points[1].y, points[2].x, points[2].y);
     context.stroke();
+
+    points.forEach(point => {
+      point.draw(context); 
+    })
   };
 };
 
@@ -38,6 +42,7 @@ class Point {
     context.arc(0, 0, 10, 0, Math.PI * 2);
     context.fillStyle = this.control ? 'red' : 'black';
     context.fill();
+    context.closePath();
     context.restore();
   }
 }
