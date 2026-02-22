@@ -9,8 +9,8 @@ const settings = {
 
 const sketch = ({ width, height }) => {
 
-  const numRows = 48;
-  const numCols = 8;
+  const numRows = 12;
+  const numCols = 144;
   const gridWidth = width * 0.8;
   const gridHeight = height * 0.8;
   const cellWidth = gridWidth / numCols;
@@ -19,7 +19,7 @@ const sketch = ({ width, height }) => {
   const gridMarginY = (height - gridHeight) * 0.5;
 
   const colorPalette = colormap({
-    colormap: 'inferno',
+    colormap: 'jet',
     nshades: 16,
     format: 'hex',
     alpha: .5,
@@ -42,8 +42,8 @@ const sketch = ({ width, height }) => {
       x += noise;
       y += noise;
 
-      const lineWidth = math.mapRange(noise, -amplitude, amplitude, 4, 20);
-      const color = colorPalette[Math.floor(math.mapRange(noise, -amplitude, amplitude, 0, amplitude / 9))];
+      const lineWidth = math.mapRange(noise, -amplitude, amplitude, 1, 5);
+      const color = colorPalette[Math.floor(math.mapRange(noise, -amplitude, amplitude, 0, 16))];
 
       points.push(new Point({ x, y, lineWidth, color }))
     }
@@ -70,12 +70,12 @@ const sketch = ({ width, height }) => {
 
         const currPoint = points[r * numCols + c + 0];
         const nextPoint = points[r * numCols + c + 1];
-        const mx = currPoint.x + (nextPoint.x - currPoint.x) * 0.5;
-        const my = currPoint.y + (nextPoint.y - currPoint.y) * 0.5;
+        const mx = currPoint.x + (nextPoint.x - currPoint.x) * 5;
+        const my = currPoint.y + (nextPoint.y - currPoint.y) * 3;
 
         if (!(c === 0)) context.moveTo(lastX, lastY);
         context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
-        [lastX, lastY] = [mx, my];
+        [lastX, lastY] = [mx + c / numCols * 50, my + c / numCols * 50];
         
         context.lineWidth = currPoint.lineWidth;
         context.strokeStyle = currPoint.color;
