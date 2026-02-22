@@ -5,14 +5,18 @@ const settings = {
   animate: true,
 };
 
-let scaledCanvas, points;
+let scaledCanvas, points, canvasObj;
 
 const sketch = ({ canvas }) => {
   
+  canvasObj = canvas;
+
   points = [
     new Point({ x: 200, y: 540 }),
-    new Point({ x: 800, y: 800, control: true }),
+    new Point({ x: 800, y: 800 }),
     new Point({ x: 880, y: 540 }),
+    new Point({ x: 300, y: 220 }),
+    new Point({ x: 900, y: 250 }),
   ]
 
   canvas.addEventListener('mousedown', onMouseDown);
@@ -23,10 +27,28 @@ const sketch = ({ canvas }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
-    context.strokeStyle = 'black';
+    context.strokeStyle = 'gray';
     context.beginPath();
-    context.moveTo(points[0].x, points[0].y);
-    context.quadraticCurveTo(points[1].x, points[1].y, points[2].x, points[2].y);
+    for (let i = 0; i < points.length; i++) {
+      context.lineTo(points[i].x, points[i].y);
+    }
+    context.stroke();
+    context.closePath();
+
+
+    context.strokeStyle = 'black';
+    context.lineWidth = '4';
+    context.beginPath();
+    for (let i = 0; i < points.length - 1; i++) {
+      const currPoint = points[i];
+      const nextPoint = points[i + 1];
+
+      const mx = currPoint.x + (nextPoint.x - currPoint.x) * 0.5;
+      const my = currPoint.y + (nextPoint.y - currPoint.y) * 0.5;
+
+      if (i == 0) context.moveTo(mx, my);
+      else context.quadraticCurveTo(points[i].x, points[i].y, mx, my);
+    }
     context.stroke();
 
     points.forEach(point => {
@@ -35,19 +57,27 @@ const sketch = ({ canvas }) => {
   };
 };
 
+let mouseClickAndMove = false;
+
 const onMouseDown = (e) => {
-  window.addEventListener('mousemove', onMouseMove);
+  canvasObj.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
 
   const x = e.offsetX / scaledCanvas.offsetWidth * scaledCanvas.width;
   const y = e.offsetY / scaledCanvas.offsetHeight * scaledCanvas.height;
 
+  let hit = false;
   points.forEach(point => {
-    if (point.hitTest(x, y)) { point.isPressed = true; }
-  })
+    if (point.hitTest(x, y)) { point.isPressed = true; hit = true };
+  });
+  if (!hit) {
+    points.push(new Point({ x, y }))
+  }
 }
 
 const onMouseMove = (e) => {
+
+  mouseClickAndMove = true;
 
   const x = e.offsetX / scaledCanvas.offsetWidth * scaledCanvas.width;
   const y = e.offsetY / scaledCanvas.offsetHeight * scaledCanvas.height;
@@ -61,12 +91,22 @@ const onMouseMove = (e) => {
 }
 
 const onMouseUp = () => {
-  window.removeEventListener('mousemove', onMouseMove);
+  canvasObj.removeEventListener('mousemove', onMouseMove);
   window.removeEventListener('mouseup', onMouseUp);
+
+  if (!mouseClickAndMove) {
+    let updatedPoints = [];
+    points.forEach(point => {
+      if (!point.isPressed) updatedPoints.push(point);
+    });
+    points = updatedPoints;
+  }
 
   points.forEach(point => {
     point.isPressed = false;
-  })
+  });
+
+  mouseClickAndMove = false
 }
 
 class Point {
