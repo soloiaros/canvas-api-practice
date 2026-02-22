@@ -55,11 +55,33 @@ const sketch = ({ width, height }) => {
         const my = currPoint.y + (nextPoint.y - currPoint.y) * 0.5;
         if (c === 0) context.moveTo(currPoint.x, currPoint.y);
         else if (c === numCols - 2) context.quadraticCurveTo(currPoint.x, currPoint.y, nextPoint.x, nextPoint.y);
-        else context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
+        context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
       }
       context.stroke();
       context.closePath();
     }
+    for (let c = 0; c < numCols - 1; c++) {
+      context.beginPath();
+      for (let r = 0; r < numRows; r++) {
+        const currPoint = points[(r + 0) * numCols + (c + 0)];
+        const nextPointX = points[(r + 0) * numCols + (c + 1)];
+        const mx = currPoint.x + (nextPointX.x - currPoint.x) * 0.5;
+        const my = currPoint.y + (nextPointX.y - currPoint.y) * 0.5;
+        if (r === 0 && c !== 0) context.moveTo(mx, my);
+        else context.lineTo(currPoint.x, currPoint.y);
+      }
+      context.stroke();
+      context.closePath();
+    }
+    // drawing the last vertical line
+    context.beginPath();
+    const c = numCols - 1;
+    for (let r = 0; r < numRows; r++) {
+      const currPoint = points[r * numCols + c];
+      context.lineTo(currPoint.x, currPoint.y)
+    }
+    context.stroke();
+    context.closePath();
     context.restore();
   };
 };
