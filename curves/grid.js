@@ -4,22 +4,23 @@ import math from 'canvas-sketch-util/math';
 import colormap from 'colormap';
 
 const settings = {
-  dimensions: [ 1080, 1080 ]
+  dimensions: [ 1080, 1080 ],
+  animate: true,
 };
 
 const sketch = ({ width, height }) => {
 
-  const numRows = 12;
-  const numCols = 144;
-  const gridWidth = width * 0.8;
-  const gridHeight = height * 0.8;
+  const numRows = 8;
+  const numCols = 64;
+  const gridWidth = width * 0.7;
+  const gridHeight = height * 0.7;
   const cellWidth = gridWidth / numCols;
   const cellHeight = gridHeight / numRows;
-  const gridMarginX = (width - gridWidth) * 0.5;
-  const gridMarginY = (height - gridHeight) * 0.5;
+  const gridMarginX = (width - gridWidth) * 0.5 - 100;
+  const gridMarginY = (height - gridHeight) * 0.5 - 100;
 
   const colorPalette = colormap({
-    colormap: 'jet',
+    colormap: 'bone',
     nshades: 16,
     format: 'hex',
     alpha: .5,
@@ -38,7 +39,6 @@ const sketch = ({ width, height }) => {
       let y = gridMarginY + r * cellHeight;
 
       const noise = random.noise2D(x, y, frequency, amplitude);
-      console.log(noise)
       x += noise;
       y += noise;
 
@@ -51,16 +51,18 @@ const sketch = ({ width, height }) => {
 
 
   
-  return ({ context, width, height }) => {
+  return ({ context, width, height, frame }) => {
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
     
     context.save();
     context.translate(cellWidth * 0.5, cellHeight * 0.5);
-    // drawing dots
-    // for (let point of points) {
-    //   point.draw(context);
-    // }
+
+    points.forEach(point => {
+      const noise = random.noise2D(point.initX + frame * 3, point.initY, frequency, amplitude);
+      point.x = point.initX + noise;
+      point.y = point.initY + noise;
+    })
     
     //drawing lines
     let lastX, lastY;
@@ -70,12 +72,12 @@ const sketch = ({ width, height }) => {
 
         const currPoint = points[r * numCols + c + 0];
         const nextPoint = points[r * numCols + c + 1];
-        const mx = currPoint.x + (nextPoint.x - currPoint.x) * 5;
-        const my = currPoint.y + (nextPoint.y - currPoint.y) * 3;
+        const mx = currPoint.x + (nextPoint.x - currPoint.x) * 0.5;
+        const my = currPoint.y + (nextPoint.y - currPoint.y) * 5;
 
         if (!(c === 0)) context.moveTo(lastX, lastY);
         context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
-        [lastX, lastY] = [mx + c / numCols * 50, my + c / numCols * 50];
+        [lastX, lastY] = [mx + c / numCols * 150, my + r / numRows * 200];
         
         context.lineWidth = currPoint.lineWidth;
         context.strokeStyle = currPoint.color;
@@ -92,6 +94,8 @@ class Point {
   constructor({ x, y, lineWidth, color }) {
     this.x = x;
     this.y = y;
+    this.initX = x;
+    this.initY = y;
     this.lineWidth = lineWidth;
     this.color = color;
   }
