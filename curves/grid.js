@@ -4,23 +4,23 @@ import math from 'canvas-sketch-util/math';
 import colormap from 'colormap';
 
 const settings = {
-  dimensions: [ 1080, 1080 ],
+  dimensions: [ 1584, 396 ],
   animate: true,
 };
 
 const sketch = ({ width, height }) => {
 
-  const numRows = 8;
-  const numCols = 64;
-  const gridWidth = width * 0.7;
-  const gridHeight = height * 0.7;
+  const numRows = 50;
+  const numCols = 250;
+  const gridWidth = width * 1.2;
+  const gridHeight = height * 1.2;
   const cellWidth = gridWidth / numCols;
   const cellHeight = gridHeight / numRows;
-  const gridMarginX = (width - gridWidth) * 0.5 - 100;
-  const gridMarginY = (height - gridHeight) * 0.5 - 100;
+  const gridMarginX = (width - gridWidth) * 0.5;
+  const gridMarginY = (height - gridHeight) * 0.5;
 
   const colorPalette = colormap({
-    colormap: 'bone',
+    colormap: 'magma',
     nshades: 16,
     format: 'hex',
     alpha: .5,
@@ -52,6 +52,7 @@ const sketch = ({ width, height }) => {
 
   
   return ({ context, width, height, frame }) => {
+    console.log(frame)
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
     
@@ -59,10 +60,15 @@ const sketch = ({ width, height }) => {
     context.translate(cellWidth * 0.5, cellHeight * 0.5);
 
     points.forEach(point => {
-      const noise = random.noise2D(point.initX + frame * 3, point.initY, frequency, amplitude);
+      const noise = random.noise2D(point.initX + frame * 3, point.initY + frame, frequency, amplitude + 100 * Math.sin(Math.PI * 2 * (frame % 120) / 120));
       point.x = point.initX + noise;
       point.y = point.initY + noise;
     })
+
+    //drawing points
+    // points.forEach(point => {
+    //   point.draw(context);
+    // })
     
     //drawing lines
     let lastX, lastY;
@@ -104,8 +110,8 @@ class Point {
     context.save();
     context.translate(this.x, this.y);
     context.beginPath();
-    context.arc(0, 0, 10, 0, Math.PI * 2);
-    context.fillStyle = 'red';
+    context.arc(0, 0, this.lineWidth, 0, Math.PI * 2);
+    context.fillStyle = this.color;
     context.fill();
     context.closePath();
     context.restore();
