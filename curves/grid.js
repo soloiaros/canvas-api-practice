@@ -8,10 +8,12 @@ const settings = {
   animate: true,
 };
 
+let f = new FontFace("clip-text", "url(../fonts/CascadiaMono-Regular.woff2)");
+
 const sketch = ({ width, height }) => {
 
-  const numRows = 50;
-  const numCols = 250;
+  const numRows = 150;
+  const numCols = 300;
   const gridWidth = width * 1.2;
   const gridHeight = height * 1.2;
   const cellWidth = gridWidth / numCols;
@@ -20,7 +22,7 @@ const sketch = ({ width, height }) => {
   const gridMarginY = (height - gridHeight) * 0.5;
 
   const colorPalette = colormap({
-    colormap: 'magma',
+    colormap: 'inferno',
     nshades: 16,
     format: 'hex',
     alpha: .5,
@@ -49,11 +51,22 @@ const sketch = ({ width, height }) => {
     }
   }
 
-
+  // defining clipping mask
+  const maskCanvas = document.createElement('canvas');
+  maskCanvas.width = width;
+  maskCanvas.height = height;
+  const maskContext = maskCanvas.getContext('2d');
+  maskContext.save();
+  maskContext.translate(width * 0.5, height * 0.5);
+  maskContext.font = `700 ${height / 2}px clip-text`;
+  maskContext.fillStyle = 'white';
+  maskContext.textBaseline = 'middle';
+  maskContext.textAlign = 'center';
+  maskContext.fillText("Welcome", 0, 0);
+  maskContext.restore();
   
   return ({ context, width, height, frame }) => {
-    console.log(frame)
-    context.fillStyle = 'black';
+    context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
     
     context.save();
@@ -65,33 +78,42 @@ const sketch = ({ width, height }) => {
       point.y = point.initY + noise;
     })
 
+
     //drawing points
-    // points.forEach(point => {
-    //   point.draw(context);
-    // })
+    points.forEach(point => {
+      point.draw(context);
+    })
     
     //drawing lines
-    let lastX, lastY;
-    for (let r = 0; r < numRows; r++) {
-      for (let c = 0; c < numCols - 1; c++) {
-        context.beginPath();
+    // let lastX, lastY;
+    // for (let r = 0; r < numRows; r++) {
+    //   for (let c = 0; c < numCols - 1; c++) {
+    //     context.beginPath();
 
-        const currPoint = points[r * numCols + c + 0];
-        const nextPoint = points[r * numCols + c + 1];
-        const mx = currPoint.x + (nextPoint.x - currPoint.x) * 0.5;
-        const my = currPoint.y + (nextPoint.y - currPoint.y) * 5;
+    //     const currPoint = points[r * numCols + c + 0];
+    //     const nextPoint = points[r * numCols + c + 1];
+    //     const mx = currPoint.x + (nextPoint.x - currPoint.x) * 0.5;
+    //     const my = currPoint.y + (nextPoint.y - currPoint.y) * 5;
 
-        if (!(c === 0)) context.moveTo(lastX, lastY);
-        context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
-        [lastX, lastY] = [mx + c / numCols * 150, my + r / numRows * 200];
+    //     if (!(c === 0)) context.moveTo(lastX, lastY);
+    //     context.quadraticCurveTo(currPoint.x, currPoint.y, mx, my);
+    //     [lastX, lastY] = [mx + c / numCols * 150, my + r / numRows * 200];
         
-        context.lineWidth = currPoint.lineWidth;
-        context.strokeStyle = currPoint.color;
-        context.stroke();
-        context.closePath();
-      }
-    }
+    //     context.lineWidth = currPoint.lineWidth;
+    //     context.strokeStyle = currPoint.color;
+    //     context.stroke();
+    //     context.closePath();
+    //   }
+    // }
     context.restore();
+
+    // rendering the masking canvas
+    context.globalCompositeOperation = 'destination-in';
+    context.drawImage(maskCanvas, 0, 0);
+    context.globalCompositeOperation = 'destination-over';
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, width, height);
+    context.globalCompositeOperation = 'source-over';
   };
 };
 
@@ -118,4 +140,8 @@ class Point {
   }
 }
 
-canvasSketch(sketch, settings);
+f.load().then(() => {
+  document.fonts.add(f);
+  console.log(f)
+  canvasSketch(sketch, settings);
+})
