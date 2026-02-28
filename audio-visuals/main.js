@@ -1,10 +1,18 @@
 import canvasSketch from 'canvas-sketch';
+import colormap from 'colormap';
 import './styles.css';
 
 const settings = {
   dimensions: [ 1080, 1080 ],
   animate: true,
 };
+
+const colorPalette = colormap({
+  colormap: 'plasma',
+  nshades: 64,
+  format: 'hex',
+  alpha: .3,
+});
 
 let audioContext, audioData, analyzerNode;
 let manager;
@@ -21,9 +29,9 @@ const sketch = () => {
     context.save();
     context.translate(width * 0.5, height * 0.5);
     context.beginPath();
-    context.arc(0, 0, Math.abs(avgFreq), 0, 360);
-    context.lineWidth = 10;
-    context.strokeStyle = '#333';
+    context.arc(0, 0, Math.abs(avgFreq) * 2, 0, 360);
+    context.lineWidth = 50;
+    context.strokeStyle = colorPalette[Math.abs(Math.floor(avgFreq) % 64)];
     context.stroke();
     context.closePath();
     context.restore();
