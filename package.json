@@ -16,7 +16,10 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "canvas-sketch-cli": "^1.15.0",
     "canvas-sketch-util": "^1.10.0",
+    "css-loader": "^7.1.4",
+    "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.6",
+    "style-loader": "^4.0.0",
     "webpack": "^5.105.3",
     "webpack-cli": "^6.0.1"
   },

@@ -14,6 +14,18 @@ export default {
       template: './audio-visuals/index.html',
     })
   ],
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.html$/i,
+        use: ["html-loader"],
+      }
+    ]
+  },
   devtool: "eval-source-map",
   devServer: {
     watchFiles: ["./audio-visuals/index.html"],
