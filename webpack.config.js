@@ -1,18 +1,23 @@
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import path from "node:path";
+const path = require("path");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-export default {
+module.exports = {
   mode: "development",
   entry: "./audio-visuals/main.js",
   output: {
     filename: "main.js",
-    path: path.resolve(import.meta.dirname, "dist"),
+    path: path.resolve(__dirname, "dist"),
     clean: true,
+    publicPath: '',
+  },
+  devtool: "eval-source-map",
+  devServer: {
+    watchFiles: ['.audio-visuals/index.html'],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './audio-visuals/index.html',
-    })
+      template: "./audio-visuals/index.html",
+    }),
   ],
   module: {
     rules: [
@@ -22,12 +27,20 @@ export default {
       },
       {
         test: /\.html$/i,
-        use: ["html-loader"],
-      }
-    ]
-  },
-  devtool: "eval-source-map",
-  devServer: {
-    watchFiles: ["./audio-visuals/index.html"],
+        loader: "html-loader",
+      },
+      {
+        test: /\.(png|svg|jpg|gif|jper)$/i,
+        type: "asset/resource",
+      },
+      {
+        test: /\.mp3$/i,
+        type: "asset",
+      },
+      {
+        test: /\.(woff|woff2|ttf|otf|eot)/i,
+        type: "asset/resource",
+      },
+    ],
   },
 };
