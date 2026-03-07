@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -18,6 +19,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./audio-visuals/index.html",
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: './audio-visuals/audio',
+          to: 'audio',
+        }
+      ]
+    })
   ],
   module: {
     rules: [
@@ -26,16 +35,8 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.html$/i,
-        loader: "html-loader",
-      },
-      {
-        test: /\.(png|svg|jpg|gif|jper)$/i,
+        test: /\.(png|svg|jpg|gif|jpeg)$/i,
         type: "asset/resource",
-      },
-      {
-        test: /\.mp3$/i,
-        type: "asset",
       },
       {
         test: /\.(woff|woff2|ttf|otf|eot)/i,
