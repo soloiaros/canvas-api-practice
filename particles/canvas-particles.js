@@ -12,9 +12,27 @@ const sketch = ({ width, height, canvas }) => {
   elCanvas = canvas;
   setEventListeners(canvas);
 
+  const numCircles = 15;
+  const gapCircles = 4;
+  const gapDots = 4;
+  let dotRadius = 12;
+  let circleRadius = 0;
+  const fitRadius = dotRadius;
   const particles = [];
-  for (let i = 0; i < 1; i++) {
-    particles.push(new Particle(width * 0.5, height * 0.5));
+
+  for (let i = 0; i < numCircles; i++) {
+    const circumference = Math.PI * 2 * circleRadius;
+    const numDotsInCircle = i ? Math.floor(circumference / (fitRadius * 2 + gapDots)) : 1;
+
+    for (let j = 0; j < numDotsInCircle; j++) {
+      const theta = (Math.PI * 2 / numDotsInCircle) * j;
+      const x = width * 0.5 + Math.cos(theta) * circleRadius;
+      const y = height * 0.5 + Math.sin(theta) * circleRadius;
+      particles.push(new Particle({ x, y, radius: dotRadius }));
+    }
+
+    circleRadius += fitRadius * 2 + gapCircles;
+    dotRadius = (1 - i / numCircles) * fitRadius;
   }
   
   return ({ context, width, height }) => {
@@ -29,12 +47,12 @@ const sketch = ({ width, height, canvas }) => {
 };
 
 class Particle {
-  constructor(x, y, radius = 10) {
+  constructor({ x, y, radius = 10 }) {
     this.radius = radius;
     this.minReactDistance = 100;
     this.pushFactor = 0.02;
     this.pullFactor = 0.02;
-    this.dampFactor = 0.95;
+    this.dampFactor = 0.92;
 
     // position
     this.x = x;
