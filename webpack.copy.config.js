@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -12,13 +13,25 @@ module.exports = {
   },
   devtool: "eval-source-map",
   devServer: {
-    watchFiles: ["./particles/template.html"],
+    watchFiles: [],
     static: './dist',
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./particles/template.html",
+      template: "./audio-visuals/index.html",
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: './audio-visuals/audio',
+          to: 'audio',
+        },
+        {
+          from: './audio-visuals/fonts',
+          to: 'fonts',
+        }
+      ]
+    })
   ],
   module: {
     rules: [

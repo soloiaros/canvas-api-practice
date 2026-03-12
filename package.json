@@ -4,12 +4,14 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "main": "audio-visuals/main.js",
+  "main": "particles/canvas-particles.js",
   "scripts": {
     "create": "canvas-sketch-cli --new --open",
     "open": "canvas-sketch-cli --open",
     "record": "canvas-sketch-cli --open --output=tmp --stream=mp4",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "dev": "webpack serve"
   },
   "devDependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
