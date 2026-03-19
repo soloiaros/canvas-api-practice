@@ -1,5 +1,5 @@
 import canvasSketch from 'canvas-sketch';
-import imgSourceURL from '../images/txt.png';
+// import imgSourceURL from '../images/txt.png';
 
 const settings = {
   dimensions: [ 1080, 1080 ],
@@ -7,7 +7,7 @@ const settings = {
 };
 
 const cursor = { x: -9999, y: -9999 }
-let elCanvas, imgSource;
+let elCanvas;
 
 const sketch = ({ width, height, canvas }) => {
   elCanvas = canvas;
@@ -15,15 +15,18 @@ const sketch = ({ width, height, canvas }) => {
 
   const imgSourceCanvas = document.createElement('canvas');
   const imgSourceContext = imgSourceCanvas.getContext('2d');
-  imgSourceCanvas.width = imgSource.width;
-  imgSourceCanvas.height = imgSource.height;
-  imgSourceContext.drawImage(imgSource, 0, 0);
-  const imgSourceData = imgSourceContext.getImageData(0, 0, imgSource.width, imgSource.height).data;
+  imgSourceCanvas.width = width;
+  imgSourceCanvas.height = height;
+  imgSourceContext.fillStyle = 'white';
+  imgSourceContext.font = '256px sans-serif';
+  imgSourceContext.textAlign = 'center';
+  imgSourceContext.fillText("YUM", width * 0.5, height * 0.5);
+  const imgSourceData = imgSourceContext.getImageData(0, 0, width, height).data;
 
-  const numCircles = 50;
+  const numCircles = 150;
   const gapCircles = 4;
   const gapDots = 4;
-  let dotRadius = 3;
+  let dotRadius = 1;
   let circleRadius = 0;
   const fitRadius = dotRadius;
   const particles = [];
@@ -37,13 +40,12 @@ const sketch = ({ width, height, canvas }) => {
       const x = width * 0.5 + Math.cos(theta) * circleRadius;
       const y = height * 0.5 + Math.sin(theta) * circleRadius;
 
-      const imageX = Math.floor((x / width) * imgSource.width);
-      const imageY = Math.floor((y / width) * imgSource.height);
-      const colorIndex = (imageY * imgSource.width + imageX) * 4;
+      const imageX = Math.floor(x);
+      const imageY = Math.floor(y);
+      const colorIndex = (imageY * width + imageX) * 4;
       const color = `rgb(${imgSourceData[colorIndex + 0]}, ${imgSourceData[colorIndex + 1]}, ${imgSourceData[colorIndex + 2]})`;
 
-      console.log(colorIndex)
-      particles.push(new Particle({ x, y, radius: dotRadius, color }));
+      if (color !== 'rgb(0, 0, 0)') particles.push(new Particle({ x, y, radius: dotRadius, color }));
     }
 
     circleRadius += fitRadius * 2 + gapCircles;
@@ -53,6 +55,8 @@ const sketch = ({ width, height, canvas }) => {
   return ({ context, width, height }) => {
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
+
+    // context.drawImage(imgSourceCanvas, 0, 0)
 
     particles.forEach((particle) => {
       particle.update();
@@ -65,7 +69,7 @@ class Particle {
   constructor({ x, y, radius = 10, color = 'black' }) {
     this.radius = radius;
     this.color = color;
-    this.minReactDistance = 100;
+    this.minReactDistance = 50;
     this.pushFactor = 0.04;
     this.pullFactor = 0.02;
     this.dampFactor = 0.92;
@@ -169,8 +173,7 @@ const setEventListeners = (canvas) => {
 }
 
 const start = async () => {
-  imgSource = await loadImage(imgSourceURL);
-  console.log(imgSource)
+  // imgSource = await loadImage(imgSourceURL);
   canvasSketch(sketch, settings);
 }
 
