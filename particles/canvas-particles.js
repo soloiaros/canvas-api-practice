@@ -1,4 +1,5 @@
-const canvasSketch = require('canvas-sketch');
+import canvasSketch from 'canvas-sketch';
+import imgSourceURL from '../images/txt.png';
 
 const settings = {
   dimensions: [ 1080, 1080 ],
@@ -6,16 +7,23 @@ const settings = {
 };
 
 const cursor = { x: -9999, y: -9999 }
-let elCanvas;
+let elCanvas, imgSource;
 
 const sketch = ({ width, height, canvas }) => {
   elCanvas = canvas;
   setEventListeners(canvas);
 
-  const numCircles = 15;
+  const imgSourceCanvas = document.createElement('canvas');
+  const imgSourceContext = imgSourceCanvas.getContext('2d');
+  imgSourceCanvas.width = imgSource.width;
+  imgSourceCanvas.height = imgSource.height;
+  imgSourceContext.drawImage(imgSource, 0, 0);
+  const imgSourceData = imgSourceContext.getImageData(0, 0, imgSource.width, imgSource.height).data;
+
+  const numCircles = 50;
   const gapCircles = 4;
   const gapDots = 4;
-  let dotRadius = 12;
+  let dotRadius = 3;
   let circleRadius = 0;
   const fitRadius = dotRadius;
   const particles = [];
@@ -28,7 +36,14 @@ const sketch = ({ width, height, canvas }) => {
       const theta = (Math.PI * 2 / numDotsInCircle) * j;
       const x = width * 0.5 + Math.cos(theta) * circleRadius;
       const y = height * 0.5 + Math.sin(theta) * circleRadius;
-      particles.push(new Particle({ x, y, radius: dotRadius }));
+
+      const imageX = Math.floor((x / width) * imgSource.width);
+      const imageY = Math.floor((y / width) * imgSource.height);
+      const colorIndex = (imageY * imgSource.width + imageX) * 4;
+      const color = `rgb(${imgSourceData[colorIndex + 0]}, ${imgSourceData[colorIndex + 1]}, ${imgSourceData[colorIndex + 2]})`;
+
+      console.log(colorIndex)
+      particles.push(new Particle({ x, y, radius: dotRadius, color }));
     }
 
     circleRadius += fitRadius * 2 + gapCircles;
@@ -36,7 +51,7 @@ const sketch = ({ width, height, canvas }) => {
   }
   
   return ({ context, width, height }) => {
-    context.fillStyle = 'white';
+    context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
 
     particles.forEach((particle) => {
@@ -47,10 +62,11 @@ const sketch = ({ width, height, canvas }) => {
 };
 
 class Particle {
-  constructor({ x, y, radius = 10 }) {
+  constructor({ x, y, radius = 10, color = 'black' }) {
     this.radius = radius;
+    this.color = color;
     this.minReactDistance = 100;
-    this.pushFactor = 0.02;
+    this.pushFactor = 0.04;
     this.pullFactor = 0.02;
     this.dampFactor = 0.92;
 
@@ -105,7 +121,7 @@ class Particle {
   draw(context) {
     context.save();
     context.translate(this.x, this.y);
-    context.fillStyle = 'black';
+    context.fillStyle = this.color;
 
     context.beginPath();
     context.arc(0, 0, this.radius, 0, Math.PI * 2);
@@ -114,6 +130,15 @@ class Particle {
     
     context.restore();
   }
+}
+
+const loadImage = async (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject();
+    img.src = url;
+  })
 }
 
 const setEventListeners = (canvas) => {
@@ -143,4 +168,10 @@ const setEventListeners = (canvas) => {
   }
 }
 
-canvasSketch(sketch, settings);
+const start = async () => {
+  imgSource = await loadImage(imgSourceURL);
+  console.log(imgSource)
+  canvasSketch(sketch, settings);
+}
+
+start();
